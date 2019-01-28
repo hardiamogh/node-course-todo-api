@@ -27,5 +27,4 @@ app.listen(3000, () => {
     console.log("started at 3000")
 });
 
-
-
+module.exports = { app };
