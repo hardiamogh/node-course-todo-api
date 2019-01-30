@@ -33,4 +33,11 @@ describe('POST /todos', () => {
                 }).catch((e) => done(e));
             })
     });
+});
+
+describe('GET /todos/:id', () => {
+    it('should return todo doc', (done) => {
+
+    });
+
 })

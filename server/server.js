@@ -51,20 +51,33 @@ app.get('/todos/:id', (req, res) => {
         console.log('found')
         console.log(todo)
         res.send({ todo });
-    }, () => {
+    }, (e) => {
 
     }).catch((e) => {
         res.status(400).send();
     })
-
-    // findById 
-    //success
-    // if(todo) - send back.
-    // if no todo - send back 404.
-    //err
-    //400 - send empty body back.    
     res.send(req.params);
-})
+});
+
+app.delete('/todos/:id', (req, res) => {
+    var id = req.params.id;
+    console.log(id);
+
+    if (!ObjectID.isValid(id)) {
+        return res.status(404).send();
+    }
+
+    Todo.findByIdAndRemove(id).then((todo) => {
+        if (!todo) {
+            return res.status(404).send();
+        }
+
+        res.send(todo);
+    }).catch((e) => {
+        Response.status(400).send();
+    });
+
+});
 
 app.listen(port, () => {
     console.log(`started at ${port}`);
