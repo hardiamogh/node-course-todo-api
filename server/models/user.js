@@ -4,7 +4,7 @@ const validator = require('validator');
 const jwt = require('jsonwebtoken');
 
 const _ = require('lodash');
-
+const bcrypt = require('bcryptjs');
 var UserSchema = new mongoose.Schema(
     {
         email: {
@@ -39,6 +39,22 @@ var UserSchema = new mongoose.Schema(
 
     });
 
+UserSchema.pre('save', function (next) {
+    var user = this;
+    if (user.isModified('password')) {
+        bcrypt.genSalt(10, (err, salt) => {
+            bcrypt.hash(user.password, salt, (err, hash) => {
+                user.password = hash;
+                next();
+            });
+        })
+
+    } else {
+        next();
+
+    }
+});
+
 UserSchema.methods.toJSON = function () {
     var user = this;
     var userObject = user.toObject();
@@ -47,12 +63,20 @@ UserSchema.methods.toJSON = function () {
 }
 
 UserSchema.methods.generateAuthToken = function () {
+    console.log('in generate auth token');
     var user = this;
     var access = 'auth';
     var token = jwt.sign({ _id: user._id.toHexString(), access }, 'abc123').toString();
+    console.log("token:", token)
+    try {
+        user.tokens = user.tokens.concat([{ access, token }]);
+    } catch (e) {
+        console.log('erroe concanating user.tokens', e);
+    }
 
-    user.tokens = user.tokens.concat([{ access, token }])
+    console.log(user.tokens);
     return user.save().then(() => {
+        console.log('in generate auth, user.save');
         return token;
     })
 };
